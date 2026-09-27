@@ -15,7 +15,6 @@ function toggleTheme() {
 
 function numeroParaExtenso(valorNum) {
     if (isNaN(valorNum) || valorNum <= 0) return "";
-    
     const unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
     const dezenas10 = ["dez", "onze", "doze", "treze", "quatorze", "quinze", "dezesseis", "dezessete", "dezoito", "dezenove"];
     const dezenas = ["", "dez", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"];
@@ -38,10 +37,8 @@ function numeroParaExtenso(valorNum) {
 
     let inteiros = Math.floor(valorNum);
     let centavos = Math.round((valorNum - inteiros) * 100);
-    
     let grupos = [], temp = inteiros;
     while (temp > 0) { grupos.push(temp % 1000); temp = Math.floor(temp / 1000); }
-
     let sufixos = [["", ""], ["mil", "mil"], ["milhão", "milhões"], ["bilhão", "bilhões"]];
     let partesExtenso = [];
 
@@ -85,27 +82,72 @@ function extrairValorInteligente(str) {
     return isNaN(num) ? 0 : num * multi;
 }
 
+// ====== MÁSCARA QUE PÕE OS PONTOS (ex: 10000 -> 10.000) ======
+function mascaraValor(input) {
+    let v = input.value;
+    if (/[a-zA-Z]/.test(v)) return; // Se ele escrever letras (ex: 1bi), deixa passar e trata no final
+
+    v = v.replace(/[^\d,]/g, ""); // Remove tudo que não é número ou vírgula
+    let partes = v.split(",");
+    if (partes.length > 2) v = partes[0] + "," + partes[1]; // Evita duas vírgulas
+    
+    if (partes[0]) {
+        let intPart = parseInt(partes[0], 10);
+        if (!isNaN(intPart)) {
+            partes[0] = intPart.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+        } else {
+            partes[0] = "";
+        }
+    }
+    input.value = partes.join(",");
+}
+
+// ====== PÕE O ",00" AUTOMATICAMENTE QUANDO ELE SAI DO CAMPO ======
+function formatarCampoMoeda(input) {
+    let val = extrairValorInteligente(input.value);
+    if (val > 0) {
+        input.value = val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    } else {
+        input.value = "";
+    }
+    update();
+}
+
 function formatarData(dataISO) {
   if (!dataISO) return "";
   const p = dataISO.split('-');
   return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
-// ====== FUNÇÃO NOVA: Controla o Layout (Folha e 2ª Via) ======
+// ====== BOTÃO E LÓGICA DE ORIENTAÇÃO (HORIZONTAL/VERTICAL) ======
+let orientacaoAtual = 'portrait'; // Começa em Pé
+
+function toggleOrientacao() {
+    const btn = document.getElementById('btn-orientacao');
+    if (orientacaoAtual === 'portrait') {
+        orientacaoAtual = 'landscape';
+        btn.innerHTML = '📄 Mudar para Vertical';
+        btn.style.background = '#2563eb'; // Fica azul
+    } else {
+        orientacaoAtual = 'portrait';
+        btn.innerHTML = '🗂️ Mudar para Horizontal';
+        btn.style.background = '#059669'; // Volta a verde
+    }
+    atualizarImpressao();
+}
+
 function atualizarImpressao() {
-    const orientacao = document.getElementById('in-orientacao').value;
     const vias = document.getElementById('in-vias').value;
 
-    // Injeta código para dizer à impressora como rodar a folha (Retrato ou Paisagem)
     let style = document.getElementById('print-page-style');
     if (!style) {
         style = document.createElement('style');
         style.id = 'print-page-style';
         document.head.appendChild(style);
     }
-    style.innerHTML = `@page { size: A4 ${orientacao}; margin: 1cm; }`;
+    // Informa a impressora para usar a orientação escolhida no botão!
+    style.innerHTML = `@page { size: A4 ${orientacaoAtual}; margin: 1cm; }`;
 
-    // Mostra/Esconde a 2ª via e a tesourinha
     const receipt2 = document.getElementById('receipt-2');
     const cutLine = document.getElementById('cut-line');
 
@@ -149,7 +191,6 @@ function update() {
   document.getElementById('out-mes').textContent = document.getElementById('in-mes').value;
   document.getElementById('out-ano').textContent = document.getElementById('in-ano').value;
 
-  // Se a 2ª Via estiver ativada, clona tudo em tempo real para baixo
   if (document.getElementById('in-vias').value === "2") {
       document.getElementById('receipt-2').innerHTML = document.getElementById('receipt').innerHTML;
   }
@@ -169,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('in-mes').value = meses[hoje.getMonth()];
     document.getElementById('in-ano').value = hoje.getFullYear().toString().slice(-2);
     
-    // Inicia a configuração de impressão e atualiza campos
     atualizarImpressao();
     update();
 });
@@ -178,7 +218,6 @@ function exportarWord() {
   const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Recibo</title></head><body>";
   const postHtml = "</body></html>";
   
-  // O Word exporta sempre só 1 recibo para ficar fácil de editar se necessário
   const element = document.getElementById('receipt').cloneNode(true);
   element.style.backgroundColor = "#ffffff"; 
   element.style.border = "1px solid #000";

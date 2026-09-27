@@ -15,7 +15,8 @@
 
   <div class="form-group">
     <label>Valor (R$)</label>
-    <input type="text" id="in-valor" placeholder="Ex: 150,00 ou 1bi" oninput="update()">
+    <!-- Adicionada a máscara e a formatação ao sair do campo (blur) -->
+    <input type="text" id="in-valor" placeholder="Ex: 150,00 ou 1bi" oninput="mascaraValor(this); update()" onblur="formatarCampoMoeda(this)">
   </div>
 
   <div class="form-group">
@@ -54,33 +55,23 @@
     </div>
   </div>
 
-  <!-- NOVOS CONTROLOS DE IMPRESSÃO (NÃO DESPERDIÇAR FOLHA) -->
-  <div class="row" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 15px;">
-    <div class="form-group">
-      <label>Orientação da Folha</label>
-      <select id="in-orientacao" onchange="atualizarImpressao()">
-        <option value="portrait">Vertical (Retrato)</option>
-        <option value="landscape">Horizontal (Paisagem)</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Vias na Folha</label>
-      <select id="in-vias" onchange="atualizarImpressao()">
-        <option value="1">1 Recibo (Meia folha)</option>
-        <option value="2">2 Recibos (2ª Via / Folha Cheia)</option>
-      </select>
-    </div>
+  <div class="form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+    <label>Multiplicar na Folha (Poupar Papel)</label>
+    <select id="in-vias" onchange="atualizarImpressao()">
+      <option value="1">1 Recibo (Imprime só 1)</option>
+      <option value="2">2 Recibos (2ª Via / Preenche a folha)</option>
+    </select>
   </div>
 
   <div class="actions">
-    <button class="btn-pdf" onclick="window.print()">🖨️ Gerar PDF / Imprimir</button>
+    <button class="btn-pdf" onclick="window.print()">🖨️ PDF / Imprimir</button>
+    <!-- NOVO BOTÃO HORIZONTAL -->
+    <button id="btn-orientacao" class="btn-horizontal" onclick="toggleOrientacao()">🗂️ Mudar para Horizontal</button>
     <button class="btn-word" onclick="exportarWord()">📄 Gerar Word</button>
   </div>
 </div>
 
 <div class="preview" id="print-area">
-  
-  <!-- RECIBO PRINCIPAL (1ª VIA) -->
   <div id="receipt" class="receipt-container">
     <div class="r-header">
       <div class="r-logo-box">
@@ -131,10 +122,8 @@
     </div>
   </div>
 
-  <!-- LINHA DE CORTE E 2ª VIA (Inicia escondida) -->
   <div class="cut-line" id="cut-line" style="display: none;"></div>
   <div id="receipt-2" class="receipt-container" style="display: none;"></div>
-
 </div>
 
 <script src="script.js"></script>
