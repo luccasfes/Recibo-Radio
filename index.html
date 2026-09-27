@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Recibo - Rádio Cidade FM</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- FORMULÁRIO -->
+<div class="controls">
+  <h2>Preencher Recibo</h2>
+
+  <div class="form-group">
+    <label>Valor (R$)</label>
+    <input type="text" id="in-valor" placeholder="Ex: 150,00">
+  </div>
+
+  <div class="form-group">
+    <label>Valor por Extenso</label>
+    <input type="text" id="in-extenso" placeholder="Preenchido automaticamente">
+  </div>
+
+  <div class="form-group">
+    <label>Recebi de (Nome do Cliente)</label>
+    <input type="text" id="in-nome" placeholder="Nome completo ou Empresa">
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label>Período De</label>
+      <input type="date" id="in-inicio">
+    </div>
+    <div class="form-group">
+      <label>Até</label>
+      <input type="date" id="in-fim">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="form-group">
+      <label>Dia</label>
+      <input type="text" id="in-dia" placeholder="15">
+    </div>
+    <div class="form-group">
+      <label>Mês</label>
+      <input type="text" id="in-mes" placeholder="Agosto">
+    </div>
+    <div class="form-group">
+      <label>Ano (20__)</label>
+      <input type="text" id="in-ano" placeholder="26">
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-pdf" onclick="window.print()">Gerar PDF</button>
+    <button class="btn-word" onclick="exportarWord()">Gerar Word</button>
+  </div>
+</div>
+
+<!-- RECIBO -->
+<div class="preview">
+  <div id="receipt">
+
+    <!-- CABEÇALHO -->
+    <div class="r-header">
+      <div class="r-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+      </div>
+      <div class="r-title">
+        <div class="r-radio">RÁDIO CIDADE FM 87,9 FM</div>
+        <div class="r-value">R$ <span id="out-valor" class="linha-valor"></span></div>
+        <div class="r-recibo">RECIBO</div>
+      </div>
+    </div>
+
+    <!-- CORPO -->
+    <div class="r-body">
+
+      <p class="linha-simples">
+        Recebi de: <span id="out-nome" class="linha-larga"></span>
+      </p>
+
+      <p>
+        A importância supra de R$ <span id="out-extenso" class="linha-media"></span>
+        referente ao apoio Cultural na Rádio Cidade Fm 87,9 Mh2, no período de:
+        <span id="out-inicio" class="linha-data"></span> a <span id="out-fim" class="linha-data"></span>.
+      </p>
+
+      <p class="r-date">
+        Luislândia, <span id="out-dia" class="linha-pequena"></span> de
+        <span id="out-mes" class="linha-media"></span> de 20<span id="out-ano" class="linha-mini"></span>.
+      </p>
+
+    </div>
+
+    <!-- RODAPÉ -->
+    <div class="r-footer">
+      <strong>Associação da Cidade de Luislândia</strong><br>
+      CNPJ: 11.294.067/0001-00<br>
+      Rua José Antônio Mendes, 75 - Fones: (38) 9977-8195 / 9983-3671 - Centro - Luislândia - MG<br>
+      janiosilvacidadefm@yahoo.com.br - www.cidadeluislandiafm.com.br
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
