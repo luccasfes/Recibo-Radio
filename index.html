@@ -8,105 +8,111 @@
 </head>
 <body>
 
-<!-- FORMULÁRIO -->
 <div class="controls">
+  <button id="btn-theme" onclick="toggleTheme()">🌙 Modo Escuro</button>
+
   <h2>Preencher Recibo</h2>
 
   <div class="form-group">
     <label>Valor (R$)</label>
-    <input type="text" id="in-valor" placeholder="Ex: 150,00">
+    <input type="text" id="in-valor" placeholder="Ex: 150,00 ou 1bi" oninput="update()">
   </div>
 
   <div class="form-group">
     <label>Valor por Extenso</label>
-    <input type="text" id="in-extenso" placeholder="Preenchido automaticamente">
+    <input type="text" id="in-extenso" placeholder="Preenchido automaticamente..." readonly tabindex="-1">
   </div>
 
   <div class="form-group">
     <label>Recebi de (Nome do Cliente)</label>
-    <input type="text" id="in-nome" placeholder="Nome completo ou Empresa">
+    <input type="text" id="in-nome" placeholder="Nome completo ou Empresa" oninput="update()">
   </div>
 
   <div class="row">
     <div class="form-group">
       <label>Período De</label>
-      <input type="date" id="in-inicio">
+      <input type="date" id="in-inicio" oninput="update()">
     </div>
     <div class="form-group">
       <label>Até</label>
-      <input type="date" id="in-fim">
+      <input type="date" id="in-fim" oninput="update()">
     </div>
   </div>
 
   <div class="row">
     <div class="form-group">
       <label>Dia</label>
-      <input type="text" id="in-dia" placeholder="15">
+      <input type="text" id="in-dia" oninput="update()">
     </div>
     <div class="form-group">
       <label>Mês</label>
-      <input type="text" id="in-mes" placeholder="Agosto">
+      <input type="text" id="in-mes" oninput="update()">
     </div>
     <div class="form-group">
       <label>Ano (20__)</label>
-      <input type="text" id="in-ano" placeholder="26">
+      <input type="text" id="in-ano" oninput="update()">
     </div>
   </div>
 
   <div class="actions">
-    <button class="btn-pdf" onclick="window.print()">Gerar PDF</button>
-    <button class="btn-word" onclick="exportarWord()">Gerar Word</button>
+    <button class="btn-pdf" onclick="window.print()">🖨️ Gerar PDF / Imprimir</button>
+    <button class="btn-word" onclick="exportarWord()">📄 Gerar Word</button>
   </div>
 </div>
 
-<!-- RECIBO -->
 <div class="preview">
   <div id="receipt">
-
-    <!-- CABEÇALHO -->
     <div class="r-header">
-      <div class="r-logo">
-        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div class="r-logo-box">
+        <img src="logo.png" alt="Logo Rádio Cidade" onerror="this.style.display='none'">
       </div>
       <div class="r-title">
-        <div class="r-radio">RÁDIO CIDADE FM 87,9 FM</div>
-        <div class="r-value">R$ <span id="out-valor" class="linha-valor"></span></div>
-        <div class="r-recibo">RECIBO</div>
+        <h1>RÁDIO CIDADE FM 87,9 FM</h1>
+      </div>
+      <div class="r-recibo-block">
+        <h2>RECIBO</h2>
+        <div class="r-value-box">
+          R$ <span id="out-valor" class="linha" style="width: 120px; text-align: left; padding-left: 10px;"></span>
+        </div>
       </div>
     </div>
 
-    <!-- CORPO -->
+    <!-- O corpo agora usa fluxo de texto contínuo, nunca vai encavalar -->
     <div class="r-body">
-
-      <p class="linha-simples">
-        Recebi de: <span id="out-nome" class="linha-larga"></span>
-      </p>
-
-      <p>
-        A importância supra de R$ <span id="out-extenso" class="linha-media"></span>
-        referente ao apoio Cultural na Rádio Cidade Fm 87,9 Mh2, no período de:
-        <span id="out-inicio" class="linha-data"></span> a <span id="out-fim" class="linha-data"></span>.
-      </p>
-
-      <p class="r-date">
-        Luislândia, <span id="out-dia" class="linha-pequena"></span> de
-        <span id="out-mes" class="linha-media"></span> de 20<span id="out-ano" class="linha-mini"></span>.
-      </p>
-
+      <div class="form-line">
+        Recebi de: <span id="out-nome" class="linha" style="width: 82%;"></span>
+      </div>
+      
+      <div class="form-line">
+        A importância supra de R$ 
+        <span id="out-extenso" class="extenso-texto"></span><span id="extenso-spacer" class="extenso-linha"></span>
+        referente ao apoio Cultural na Rádio Cidade
+      </div>
+      
+      <div class="form-line">
+        Fm 87,9 Mh2, no periodo de: 
+        <span id="out-inicio" class="linha" style="width: 130px; text-align: center;"></span> 
+        a 
+        <span id="out-fim" class="linha" style="width: 130px; text-align: center;"></span>.
+      </div>
     </div>
 
-    <!-- RODAPÉ -->
+    <div class="r-date">
+      Luislândia, 
+      <span id="out-dia" class="linha" style="width: 40px; text-align: center;"></span> de 
+      <span id="out-mes" class="linha" style="width: 120px; text-align: center;"></span> de 
+      20<span id="out-ano" class="linha" style="width: 40px; text-align: center;"></span>.
+    </div>
+
     <div class="r-footer">
       <strong>Associação da Cidade de Luislândia</strong><br>
       CNPJ: 11.294.067/0001-00<br>
-      Rua José Antônio Mendes, 75 - Fones: (38) 9977-8195 / 9983-3671 - Centro - Luislândia - MG<br>
+      Rua José Antônio Mendes, 75 - Fones: (38) 9977-8195 / 99987-8786 - Centro - Luislândia - MG<br>
       janiosilvacidadefm@yahoo.com.br - www.cidadeluislandiafm.com.br
     </div>
-
   </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>

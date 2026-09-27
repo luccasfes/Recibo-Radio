@@ -1,4 +1,3 @@
-// ====== CONTROLO DE TEMA (CLARO/ESCURO) ======
 function toggleTheme() {
     const html = document.documentElement;
     const btn = document.getElementById('btn-theme');
@@ -14,7 +13,6 @@ function toggleTheme() {
     }
 }
 
-// ====== MOTOR DE NÚMERO PARA EXTENSO ======
 function numeroParaExtenso(valorNum) {
     if (isNaN(valorNum) || valorNum <= 0) return "";
     
@@ -51,7 +49,7 @@ function numeroParaExtenso(valorNum) {
         let g = grupos[i];
         if (g > 0) {
             let txt = traduzirGrupo(g);
-            if (i === 1 && g === 1) txt = ""; // "um mil" fica só "mil"
+            if (i === 1 && g === 1) txt = ""; 
             let sufixo = g === 1 ? sufixos[i][0] : sufixos[i][1];
             partesExtenso.push((txt + " " + sufixo).trim());
         }
@@ -72,7 +70,6 @@ function numeroParaExtenso(valorNum) {
     return resultado.charAt(0).toUpperCase() + resultado.slice(1);
 }
 
-// Analisa se a pessoa escreveu "1bi", "2.5mi", "10k", etc.
 function extrairValorInteligente(str) {
     str = str.toLowerCase().replace(/\s/g, '');
     let multi = 1;
@@ -81,21 +78,47 @@ function extrairValorInteligente(str) {
     else if (str.includes('k')) { multi = 1000; str = str.split('k')[0]; }
     else if (str.includes('mil')) { multi = 1000; str = str.split('mil')[0]; }
 
-    if (multi === 1) str = str.replace(/\./g, '').replace(',', '.'); // Valor normal
-    else str = str.replace(',', '.'); // Se escreveu 1,5bi
+    if (multi === 1) str = str.replace(/\./g, '').replace(',', '.'); 
+    else str = str.replace(',', '.'); 
     
     let num = parseFloat(str);
     return isNaN(num) ? 0 : num * multi;
 }
 
-// Formatar as datas YYYY-MM-DD para DD/MM/YYYY
 function formatarData(dataISO) {
   if (!dataISO) return "";
   const p = dataISO.split('-');
   return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
-// ====== ATUALIZAÇÃO EM TEMPO REAL ======
+// ====== FUNÇÃO NOVA: Controla o Layout (Folha e 2ª Via) ======
+function atualizarImpressao() {
+    const orientacao = document.getElementById('in-orientacao').value;
+    const vias = document.getElementById('in-vias').value;
+
+    // Injeta código para dizer à impressora como rodar a folha (Retrato ou Paisagem)
+    let style = document.getElementById('print-page-style');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'print-page-style';
+        document.head.appendChild(style);
+    }
+    style.innerHTML = `@page { size: A4 ${orientacao}; margin: 1cm; }`;
+
+    // Mostra/Esconde a 2ª via e a tesourinha
+    const receipt2 = document.getElementById('receipt-2');
+    const cutLine = document.getElementById('cut-line');
+
+    if (vias === "2") {
+        receipt2.style.display = 'block';
+        cutLine.style.display = 'block';
+        receipt2.innerHTML = document.getElementById('receipt').innerHTML;
+    } else {
+        receipt2.style.display = 'none';
+        cutLine.style.display = 'none';
+    }
+}
+
 function update() {
   let valInput = document.getElementById('in-valor').value;
   let valorReal = extrairValorInteligente(valInput);
@@ -106,13 +129,11 @@ function update() {
       document.getElementById('in-extenso').value = ext;
       document.getElementById('out-extenso').textContent = ext + " ";
       
-      // Inteligência da Linha: Se o texto for grande, a linha vazia desaparece para dar espaço
       if (ext.length > 35) {
           document.getElementById('extenso-spacer').style.display = 'none';
       } else {
           document.getElementById('extenso-spacer').style.display = 'inline-block';
       }
-      
   } else {
       document.getElementById('out-valor').textContent = "";
       document.getElementById('in-extenso').value = "";
@@ -120,7 +141,6 @@ function update() {
       document.getElementById('extenso-spacer').style.display = 'inline-block';
   }
 
-  // Outros campos
   document.getElementById('out-nome').textContent = document.getElementById('in-nome').value;
   document.getElementById('out-inicio').textContent = formatarData(document.getElementById('in-inicio').value);
   document.getElementById('out-fim').textContent = formatarData(document.getElementById('in-fim').value);
@@ -128,9 +148,13 @@ function update() {
   document.getElementById('out-dia').textContent = document.getElementById('in-dia').value;
   document.getElementById('out-mes').textContent = document.getElementById('in-mes').value;
   document.getElementById('out-ano').textContent = document.getElementById('in-ano').value;
+
+  // Se a 2ª Via estiver ativada, clona tudo em tempo real para baixo
+  if (document.getElementById('in-vias').value === "2") {
+      document.getElementById('receipt-2').innerHTML = document.getElementById('receipt').innerHTML;
+  }
 }
 
-// ====== PREENCHE A DATA DE HOJE AO ABRIR ======
 document.addEventListener("DOMContentLoaded", function() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
@@ -145,14 +169,16 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('in-mes').value = meses[hoje.getMonth()];
     document.getElementById('in-ano').value = hoje.getFullYear().toString().slice(-2);
     
+    // Inicia a configuração de impressão e atualiza campos
+    atualizarImpressao();
     update();
 });
 
-// ====== EXPORTAR PARA WORD ======
 function exportarWord() {
   const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Recibo</title></head><body>";
   const postHtml = "</body></html>";
   
+  // O Word exporta sempre só 1 recibo para ficar fácil de editar se necessário
   const element = document.getElementById('receipt').cloneNode(true);
   element.style.backgroundColor = "#ffffff"; 
   element.style.border = "1px solid #000";
